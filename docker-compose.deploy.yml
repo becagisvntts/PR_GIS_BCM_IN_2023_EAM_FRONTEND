@@ -1,0 +1,11 @@
+networks:
+  shared_proxy:
+    external: true
+      
+services:
+  app:
+    image: becagis/bcg_geosurvey_front
+    container_name: bcg_geosurvey_front
+    networks:
+      - shared_proxy
+

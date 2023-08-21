@@ -1,0 +1,12 @@
+services:
+  app:
+    build:
+      context: .
+      target: builder
+    command: yarn dev
+    working_dir: /app
+    volumes:
+      - .:/app
+      - /app/node_modules
+    ports:
+      - ${NEXT_PORT:-3001}:3001

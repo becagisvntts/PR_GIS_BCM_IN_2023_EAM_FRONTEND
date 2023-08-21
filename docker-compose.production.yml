@@ -1,0 +1,9 @@
+services:
+  app:
+    image: becagis/bcg_geosurvey_front
+    build:
+      context: .
+      target: runner
+    container_name: bcg_geosurvey_front
+    ports:
+      - ${NEXT_PORT:-3001}:3001
