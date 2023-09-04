@@ -5,13 +5,14 @@ import { NavLink, NavGroup, LayoutProps, NavSectionTitle } from 'src/@core/layou
 import VerticalNavLink from './VerticalNavLink'
 import VerticalNavGroup from './VerticalNavGroup'
 import VerticalNavSectionTitle from './VerticalNavSectionTitle'
+import { memo, useMemo } from 'react'
 
 interface Props {
   parent?: NavGroup
   navHover?: boolean
   navVisible?: boolean
-  groupActive: string[]
   isSubToSub?: NavGroup
+  groupActive: string[]
   currentActiveGroup: string[]
   navigationBorderWidth: number
   settings: LayoutProps['settings']
@@ -19,6 +20,7 @@ interface Props {
   setGroupActive: (value: string[]) => void
   setCurrentActiveGroup: (item: string[]) => void
   verticalNavItems?: LayoutProps['verticalLayoutProps']['navMenu']['navItems']
+  level: number
 }
 
 const resolveNavItemComponent = (item: NavGroup | NavLink | NavSectionTitle) => {
@@ -34,7 +36,6 @@ const VerticalNavItems = (props: Props) => {
 
   const RenderMenuItems = verticalNavItems?.map((item: NavGroup | NavLink | NavSectionTitle, index: number) => {
     const TagName: any = resolveNavItemComponent(item)
-
     return <TagName {...props} key={index} item={item} />
   })
 

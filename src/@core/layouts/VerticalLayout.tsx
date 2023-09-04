@@ -21,7 +21,6 @@ import Customizer from 'src/@core/components/customizer'
 import Navigation from './components/vertical/navigation'
 import Footer from './components/shared-components/footer'
 import ScrollToTop from 'src/@core/components/scroll-to-top'
-import SnackBar from 'src/@core/components/snackbar'
 
 const VerticalLayoutWrapper = styled('div')({
   height: '100%',
@@ -116,9 +115,6 @@ const VerticalLayout = (props: LayoutProps) => {
           >
             {children}
           </ContentWrapper>
-
-          {/* SnackBar Component */}
-          <SnackBar />
 
           {/* Footer Component */}
           <Footer footerStyles={footerProps?.sx} footerContent={footerProps?.content} {...props} />

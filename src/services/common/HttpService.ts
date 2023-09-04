@@ -1,5 +1,6 @@
 import authConfig from 'src/configs/auth'
-
+import { generateToken } from './JWT'
+var cookie = require('cookie')
 
 export default class HttpService {
   ///POST
@@ -81,5 +82,14 @@ export default class HttpService {
     }
 
     return headers
+  }
+
+  static storageSessionIdToCookie(sessionId: string) {
+    const encodedToken = generateToken({ sessionId })
+
+    const setCookie = cookie.serialize('sessionId', encodedToken, {
+      httpOnly: true,
+      maxAge: 86400
+    })
   }
 }

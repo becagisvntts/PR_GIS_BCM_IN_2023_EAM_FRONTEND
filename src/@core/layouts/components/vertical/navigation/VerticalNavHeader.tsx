@@ -15,6 +15,7 @@ import Icon from 'src/@core/components/icon'
 
 // ** Configs
 import themeConfig from 'src/configs/themeConfig'
+import { withTheme } from '@emotion/react'
 
 interface Props {
   navHover: boolean
@@ -106,7 +107,19 @@ const VerticalNavHeader = (props: Props) => {
         userNavMenuBranding(props)
       ) : (
         <LinkStyled href='/'>
-          <img src='https://becagis.vn/wp-content/uploads/2023/02/icon-geoportal.png' alt='logo' width={36} />
+          <Box
+            sx={{
+              width: '40px',
+              height: '40px',
+              background: 'white',
+              borderRadius: '100%',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center'
+            }}
+          >
+            <img src='/images/icon.png' alt='logo' width={28} />
+          </Box>
           <HeaderTitle
             variant='h6'
             sx={{

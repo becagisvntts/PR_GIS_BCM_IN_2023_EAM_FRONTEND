@@ -27,6 +27,8 @@ export default function SiteBoxAuth({ pageTitle }: { pageTitle: string }) {
         alignItems: smallScreen ? 'center' : 'end',
         flexDirection: 'column',
         backgroundColor: smallScreen ? 'transparent !important' : theme.palette.transparent.primary,
+        // backgroundImage: smallScreen ? '' : "url('/images/background.jpg')",
+        // backgroundSize: 'contain',
         width: '100%',
         maxWidth: 500,
         p: [8, smallScreen ? 0 : 8],

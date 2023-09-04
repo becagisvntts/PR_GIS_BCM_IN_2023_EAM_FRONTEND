@@ -1,5 +1,5 @@
-import { apiUrl } from './common/CommonService'
-import HttpService from './common/HttpService'
+import { apiUrl } from 'src/services/common/CommonService'
+import HttpService from 'src/services/common/HttpService'
 
 class MenuService {
   static menuApi = `${apiUrl}sessions/current/menu/`
@@ -9,10 +9,10 @@ class MenuService {
 
     if (response.ok) {
       const res = await response.json()
-      return res.data
+      return res.data.children
     }
 
-    return {}
+    return []
   }
 }
 

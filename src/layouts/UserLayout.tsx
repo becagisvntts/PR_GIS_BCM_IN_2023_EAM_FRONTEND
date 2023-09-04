@@ -1,5 +1,5 @@
 // ** React Imports
-import { ReactNode, useEffect, useState } from 'react'
+import { ReactNode, memo, useEffect, useState } from 'react'
 
 // ** MUI Imports
 import { Theme } from '@mui/material/styles'
@@ -15,7 +15,7 @@ import HorizontalNavItems from 'src/navigation/horizontal'
 
 // ** Component Import
 // Uncomment the below line (according to the layout type) when using server-side menu
-// import ServerSideVerticalNavItems from './components/vertical/ServerSideNavItems'
+import ServerSideVerticalNavItems from './components/vertical/ServerSideNavItems'
 // import ServerSideHorizontalNavItems from './components/horizontal/ServerSideNavItems'
 
 import VerticalAppBarContent from './components/vertical/AppBarContent'
@@ -26,6 +26,11 @@ import { useSettings } from 'src/@core/hooks/useSettings'
 import HttpService from 'src/services/common/HttpService'
 import { apiUrl } from 'src/services/common/CommonService'
 import { Box } from '@mui/material'
+import { useDispatch, useSelector } from 'react-redux'
+import { RootState } from 'src/store'
+import { AnyAction } from '@reduxjs/toolkit'
+import Loading from 'src/views/components/common/Loading'
+import { currentMillisecond } from 'src/services/common/ConvertHelper'
 
 interface Props {
   children: ReactNode
@@ -37,7 +42,7 @@ const UserLayout = ({ children, contentHeightFixed }: Props) => {
   const { settings, saveSettings } = useSettings()
 
   // ** Vars for server side navigation
-  // const { menuItems: verticalMenuItems } = ServerSideVerticalNavItems()
+  const { menuItems: verticalMenuItems } = ServerSideVerticalNavItems()
   // const { menuItems: horizontalMenuItems } = ServerSideHorizontalNavItems()
 
   /**
@@ -54,34 +59,7 @@ const UserLayout = ({ children, contentHeightFixed }: Props) => {
     settings.layout = 'vertical'
   }
 
-  const [menuItems, setMenuItems] = useState([])
-
-  useEffect(() => {
-    getMenuConfigFromServer()
-  }, [])
-
-  const getMenuConfigFromServer = async () => {
-    const api = `${apiUrl}sessions/current/menu/`
-    let response: any = await HttpService.getWithAuth({ endpoint: api })
-    if (response.ok) {
-      response = await response.json()
-      const menuTmp = response.data.children.map((el: any) => {
-        return {
-          title: el.objectDescription,
-          path: `#${el.menuType}`,
-          icon: 'material-symbols:home-outline'
-        }
-      })
-
-      setMenuItems(menuTmp)
-    } else {
-      return {}
-    }
-  }
-
-  return menuItems.length == 0 ? (
-    <Box></Box>
-  ) : (
+  return (
     <Layout
       hidden={hidden}
       settings={settings}
@@ -89,10 +67,7 @@ const UserLayout = ({ children, contentHeightFixed }: Props) => {
       contentHeightFixed={contentHeightFixed}
       verticalLayoutProps={{
         navMenu: {
-          navItems: menuItems
-
-          // Uncomment the below line when using server-side menu in vertical layout and comment the above line
-          // navItems: verticalMenuItems
+          navItems: verticalMenuItems
         },
         appBar: {
           content: props => (
@@ -105,19 +80,19 @@ const UserLayout = ({ children, contentHeightFixed }: Props) => {
           )
         }
       }}
-      {...(settings.layout === 'horizontal' && {
-        horizontalLayoutProps: {
-          navMenu: {
-            navItems: HorizontalNavItems()
+      // {...(settings.layout === 'horizontal' && {
+      //   horizontalLayoutProps: {
+      //     navMenu: {
+      //       navItems: HorizontalNavItems()
 
-            // Uncomment the below line when using server-side menu in horizontal layout and comment the above line
-            // navItems: horizontalMenuItems
-          },
-          appBar: {
-            content: () => <HorizontalAppBarContent settings={settings} saveSettings={saveSettings} />
-          }
-        }
-      })}
+      //       // Uncomment the below line when using server-side menu in horizontal layout and comment the above line
+      //       // navItems: horizontalMenuItems
+      //     },
+      //     appBar: {
+      //       content: () => <HorizontalAppBarContent settings={settings} saveSettings={saveSettings} />
+      //     }
+      //   }
+      // })}
     >
       {children}
     </Layout>
@@ -125,3 +100,12 @@ const UserLayout = ({ children, contentHeightFixed }: Props) => {
 }
 
 export default UserLayout
+
+export async function getServerSideProps(context: any) {
+  console.log('Log server')
+  return {
+    props: {
+      data: 1
+    }
+  }
+}

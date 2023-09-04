@@ -1,7 +1,6 @@
 // ** MUI Imports
 import { styled } from '@mui/material/styles'
 import Box, { BoxProps } from '@mui/material/Box'
-import SnackBar from 'src/@core/components/snackbar'
 
 // ** Types
 import { BlankLayoutProps } from './types'
@@ -33,8 +32,6 @@ const BlankLayout = ({ children }: BlankLayoutProps) => {
     <BlankLayoutWrapper className='layout-wrapper'>
       <Box className='app-content' sx={{ overflow: 'hidden', minHeight: '100vh', position: 'relative' }}>
         {children}
-
-        <SnackBar />
       </Box>
     </BlankLayoutWrapper>
   )

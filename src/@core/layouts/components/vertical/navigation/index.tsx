@@ -1,5 +1,5 @@
 // ** React Import
-import { useRef, useState } from 'react'
+import { memo, useRef, useState } from 'react'
 
 // ** MUI Imports
 import List from '@mui/material/List'
@@ -194,6 +194,7 @@ const Navigation = (props: Props) => {
                   setGroupActive={setGroupActive}
                   currentActiveGroup={currentActiveGroup}
                   setCurrentActiveGroup={setCurrentActiveGroup}
+                  level={0}
                   {...props}
                 />
               </List>

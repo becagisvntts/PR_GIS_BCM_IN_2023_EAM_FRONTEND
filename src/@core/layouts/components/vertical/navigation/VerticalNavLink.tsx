@@ -29,6 +29,11 @@ import CanViewNavLink from 'src/layouts/components/acl/CanViewNavLink'
 // ** Util Imports
 import { hexToRGBA } from 'src/@core/utils/hex-to-rgba'
 import { handleURLQueries } from 'src/@core/layouts/utils'
+import { useDispatch } from 'react-redux'
+import { changeActiveItem } from 'src/store/MenuSlice'
+import { useSelector } from 'react-redux'
+import { RootState } from 'src/store'
+import IconifyIcon from 'src/@core/components/icon'
 
 interface Props {
   parent?: boolean
@@ -40,6 +45,7 @@ interface Props {
   navigationBorderWidth: number
   toggleNavVisibility: () => void
   isSubToSub?: NavGroup | undefined
+  level: number
 }
 
 // ** Styled Components
@@ -88,10 +94,14 @@ const VerticalNavLink = ({
   isSubToSub,
   collapsedNavWidth,
   toggleNavVisibility,
-  navigationBorderWidth
+  navigationBorderWidth,
+  level
 }: Props) => {
   // ** Hooks
   const router = useRouter()
+  const dispatch = useDispatch()
+
+  const activeItem = useSelector((state: RootState) => state.menu.activeItem)
 
   // ** Vars
   const { navCollapsed } = settings
@@ -99,7 +109,9 @@ const VerticalNavLink = ({
   const icon = parent && !item.icon ? themeConfig.navSubItemIcon : item.icon
 
   const isNavLinkActive = () => {
-    if (router.pathname === item.path || router.asPath.endsWith(item.path!) || handleURLQueries(router, item.path)) {
+    const _handle = handleURLQueries(router, item.path)
+
+    if (router.pathname === item.path || router.asPath.endsWith(item.path!) || _handle) {
       return true
     } else {
       return false
@@ -113,23 +125,27 @@ const VerticalNavLink = ({
       <ListItem
         disablePadding
         className='nav-link'
-        disabled={item.disabled || false}
+        // disabled={item.disabled || false}
         sx={{ mt: 1, px: '0 !important' }}
       >
         <MenuNavLink
           component={Link}
           {...(item.disabled && { tabIndex: -1 })}
           className={isNavLinkActive() ? 'active' : ''}
-          href={item.path === undefined ? '/' : `${item.path}`}
+          href={''} //{item.path === undefined ? '/' : `${item.path}`}
           {...(item.openInNewTab ? { target: '_blank' } : null)}
           onClick={e => {
-            if (item.path === undefined) {
-              e.preventDefault()
-              e.stopPropagation()
-            }
-            if (navVisible) {
-              toggleNavVisibility()
-            }
+            // if (item.path === undefined) {
+            //   e.preventDefault()
+            //   e.stopPropagation()
+            // }
+            e.preventDefault()
+            e.stopPropagation()
+            dispatch(changeActiveItem(item.path))
+            router.push(`${item.path}`)
+            // if (navVisible) {
+            //   toggleNavVisibility()
+            // }
           }}
           sx={{
             py: 2,
@@ -145,20 +161,20 @@ const VerticalNavLink = ({
             sx={{
               transition: 'margin .25s ease-in-out',
               ...(navCollapsed && !navHover ? { mr: 0 } : { mr: 2 }),
-              ...(parent ? { ml: 1.5, mr: 3.5 } : {}), // This line should be after (navCollapsed && !navHover) condition for proper styling
+              // ...(parent ? { ml: 1.5 } : {}), // This line should be after (navCollapsed && !navHover) condition for proper styling
+              ...{ ml: 1.5 + level * 1.5 },
               '& svg': {
-                fontSize: '0.625rem',
-                ...(!parent ? { fontSize: '1.125rem' } : {}),
-                ...(parent && item.icon ? { fontSize: '0.875rem' } : {})
+                fontSize: '1.125rem'
+                // ...(!parent ? { fontSize: '1.125rem' } : {}),
+                // ...(parent && item.icon ? { fontSize: '0.875rem' } : {})
               }
             }}
           >
-            <UserIcon icon={icon as string} color='#fff' />
+            <IconifyIcon icon={icon as string} color='#fff' />
           </ListItemIcon>
 
           <MenuItemTextMetaWrapper
             sx={{
-              ...(isSubToSub ? { ml: 2 } : {}),
               ...(navCollapsed && !navHover ? { opacity: 0 } : { opacity: 1 })
             }}
           >
@@ -168,7 +184,7 @@ const VerticalNavLink = ({
               })}
               sx={{ color: '#fff !important' }}
             >
-              <Translations text={item.title} />
+              {item.title}
             </Typography>
             {item.badgeContent ? (
               <Chip

@@ -64,11 +64,9 @@ const AuthProvider = ({ children }: Props) => {
       })
 
       if (response.ok) {
-        const resData = await response.json()
-        const userData = resData.data
-
+        const userData = window.localStorage.getItem(authConfig.userDataKey)
+        storageUserData(JSON.parse(userData!), response)
         setLoading(false)
-        setUser(userData)
       } else {
         clearUserDataAndRedirectToLogin()
       }
@@ -94,7 +92,7 @@ const AuthProvider = ({ children }: Props) => {
 
     if (response.status == 200) {
       const resData = await response.json()
-      handleDataOnAccessSuccess(resData)
+      handleDataOnAccessSuccess(resData, response)
     } else {
       const errors = await response.json()
       if (errorCallback) errorCallback(errors)
@@ -117,12 +115,10 @@ const AuthProvider = ({ children }: Props) => {
     }
   }
 
-  const handleDataOnAccessSuccess = async (data: any) => {
+  const handleDataOnAccessSuccess = async (data: any, response: any) => {
     const userDataType = data.data
 
-    setUser({ ...userDataType })
-    window.localStorage.setItem(authConfig.sessionIdKey, userDataType._id)
-    window.localStorage.setItem(authConfig.userDataKey, JSON.stringify(userDataType))
+    storageUserData(userDataType, response)
 
     const returnUrl = router.query.returnUrl
     const redirectURL = returnUrl && returnUrl !== '/' ? returnUrl : '/'
@@ -133,6 +129,12 @@ const AuthProvider = ({ children }: Props) => {
     // signOut()
     clearUserData()
     router.push('/login')
+  }
+
+  const storageUserData = (userData: any, response: any) => {
+    setUser({ ...userData })
+    window.localStorage.setItem(authConfig.sessionIdKey, userData._id)
+    window.localStorage.setItem(authConfig.userDataKey, JSON.stringify(userData))
   }
 
   const clearUserData = () => {

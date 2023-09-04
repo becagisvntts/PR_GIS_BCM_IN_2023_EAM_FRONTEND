@@ -1,9 +1,10 @@
 import { RootState } from 'src/store'
 import { useSelector } from 'react-redux'
-import HttpService from './common/HttpService'
+import HttpService from 'src/services/common/HttpService'
+import { apiUrl } from 'src/services/common/CommonService'
 
-const tokenAPI = `${HttpService.apiUrl}token/`
-const usersAPI = `${HttpService.apiUrl}users/`
+const tokenAPI = `${apiUrl}token/`
+const usersAPI = `${apiUrl}users/`
 export default class UserService {
   static getSessionId = () => {
     const sessionId = useSelector((state: RootState) => state.user.sessionId)

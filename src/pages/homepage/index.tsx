@@ -1,14 +1,45 @@
 import { Box, Button } from '@mui/material'
-import { toast } from 'react-hot-toast'
-import { toastError, toastSuccess } from 'src/services/common/NotifyService'
+import { AnyAction } from '@reduxjs/toolkit'
+import { useRouter } from 'next/router'
+import { useEffect, useState } from 'react'
+import { useSelector } from 'react-redux'
+import { useDispatch } from 'react-redux'
+import StateHelper from 'src/services/StateHelper'
+import { toastSuccess } from 'src/services/common/NotifyService'
+import ClassService from 'src/services/eam/ClassService'
+import store, { RootState, useAppDispatch, useAppSelector } from 'src/store'
+import { fetchClasses } from 'src/store/ClassSlice'
+import Loading from 'src/views/components/common/Loading'
+
+const getSection = (path: string) => {
+  const pathArr = path.split('#')
+  return pathArr[pathArr.length - 1]
+}
 
 const Home = () => {
-  // const dispatch = useDispatch()
-  // useEffect(() => {
-  //   dispatch(fetchProjects() as unknown as AnyAction)
-  //   dispatch(fetchJoinedProjects() as unknown as AnyAction)
-  //   dispatch(fetchProjectSummary() as unknown as AnyAction)
-  // }, [])
+  const router = useRouter()
+  const dispatch = useAppDispatch()
+
+  const sectionId = getSection(router.asPath)
+  ///List config of class
+
+  const [objectType, setObjectType] = useState('')
+  const [objectTypeName, setObjectTypeName] = useState('')
+  const [objectActive, setObjectActive] = useState({})
+
+  useEffect(() => {
+    dispatch(fetchClasses())
+  }, [])
+
+  useEffect(() => {
+    // dispatch(fetchClassDetail())
+    console.log(sectionId)
+  }, [sectionId])
+
+  const getClassTypeFromSessionId = (sessionId: string) => {
+    const sessionIdArr = sessionId.split('/')
+
+  }
 
   return (
     <Box>
@@ -25,3 +56,9 @@ const Home = () => {
 }
 
 export default Home
+
+export async function getServerSideProps(context: any) {
+  return {
+    props: {}
+  }
+}

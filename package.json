@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 3001",
     "build": "next build",
     "start": "NODE_ENV=production next start",
     "export": "next export",
@@ -45,6 +45,7 @@
     "cleave.js": "1.6.0",
     "clipboard-copy": "4.0.1",
     "clsx": "1.2.1",
+    "cookie": "^0.5.0",
     "date-fns": "2.29.3",
     "dayjs": "^1.11.7",
     "draft-js": "0.11.7",

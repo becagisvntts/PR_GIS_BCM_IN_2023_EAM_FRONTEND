@@ -1,5 +1,5 @@
 // ** React Imports
-import { useEffect, Fragment } from 'react'
+import { useEffect, Fragment, useMemo, memo, useState } from 'react'
 
 // ** Next Import
 import { useRouter } from 'next/router'
@@ -34,6 +34,8 @@ import VerticalNavItems from './VerticalNavItems'
 import UserIcon from 'src/layouts/components/UserIcon'
 import Translations from 'src/layouts/components/Translations'
 import CanViewNavGroup from 'src/layouts/components/acl/CanViewNavGroup'
+import IconifyIcon from 'src/@core/components/icon'
+import { currentMillisecond } from 'src/services/common/ConvertHelper'
 
 interface Props {
   item: NavGroup
@@ -49,6 +51,7 @@ interface Props {
   saveSettings: LayoutProps['saveSettings']
   setGroupActive: (values: string[]) => void
   setCurrentActiveGroup: (items: string[]) => void
+  level: number
 }
 
 const MenuItemTextWrapper = styled(Box)<BoxProps>(({ theme }) => ({
@@ -75,7 +78,8 @@ const VerticalNavGroup = (props: Props) => {
     collapsedNavWidth,
     currentActiveGroup,
     setCurrentActiveGroup,
-    navigationBorderWidth
+    navigationBorderWidth,
+    level
   } = props
 
   // ** Hooks & Vars
@@ -86,11 +90,9 @@ const VerticalNavGroup = (props: Props) => {
   // ** Accordion menu group open toggle
   const toggleActiveGroup = (item: NavGroup, parent: NavGroup | undefined) => {
     let openGroup = groupActive
-
     // ** If Group is already open and clicked, close the group
     if (openGroup.includes(item.title)) {
       openGroup.splice(openGroup.indexOf(item.title), 1)
-
       // If clicked Group has open group children, Also remove those children to close those groups
       if (item.children) {
         removeChildren(item.children, openGroup, currentActiveGroup)
@@ -100,22 +102,18 @@ const VerticalNavGroup = (props: Props) => {
       if (parent.children) {
         removeChildren(parent.children, openGroup, currentActiveGroup)
       }
-
       // ** After removing all the open groups under that parent, add the clicked group to open group array
       if (!openGroup.includes(item.title)) {
         openGroup.push(item.title)
       }
     } else {
       // ** If clicked on another group that is not active or open, create openGroup array from scratch
-
       // ** Empty Open Group array
       openGroup = []
-
       // ** push Current Active Group To Open Group array
       if (currentActiveGroup.every(elem => groupActive.includes(elem))) {
         openGroup.push(...currentActiveGroup)
       }
-
       // ** Push current clicked group item to Open Group array
       if (!openGroup.includes(item.title)) {
         openGroup.push(item.title)
@@ -126,58 +124,63 @@ const VerticalNavGroup = (props: Props) => {
 
   // ** Menu Group Click
   const handleGroupClick = () => {
-    const openGroup = groupActive
-    if (verticalNavToggleType === 'collapse') {
-      if (openGroup.includes(item.title)) {
-        openGroup.splice(openGroup.indexOf(item.title), 1)
-      } else {
-        openGroup.push(item.title)
-      }
-      setGroupActive([...openGroup])
-    } else {
-      toggleActiveGroup(item, parent)
-    }
+    setVisibleChild(!visibleChild)
+    // const openGroup = groupActive
+    // console.log(verticalNavToggleType)
+    // if (verticalNavToggleType === 'collapse') {
+    //   if (openGroup.includes(item.title)) {
+    //     openGroup.splice(openGroup.indexOf(item.title), 1)
+    //   } else {
+    //     openGroup.push(item.title)
+    //   }
+    //   setGroupActive([...openGroup])
+    // } else {
+    //   toggleActiveGroup(item, parent)
+    // }
   }
 
-  useEffect(() => {
-    if (hasActiveChild(item, currentURL)) {
-      if (!groupActive.includes(item.title)) groupActive.push(item.title)
-    } else {
-      const index = groupActive.indexOf(item.title)
-      if (index > -1) groupActive.splice(index, 1)
-    }
-    setGroupActive([...groupActive])
-    setCurrentActiveGroup([...groupActive])
+  // useEffect(() => {
+  //   if (hasActiveChild(item, currentURL)) {
+  //     if (!groupActive.includes(item.title)) groupActive.push(item.title)
+  //   } else {
+  //     const index = groupActive.indexOf(item.title)
+  //     if (index > -1) groupActive.splice(index, 1)
+  //   }
+  //   setGroupActive([...groupActive])
+  //   setCurrentActiveGroup([...groupActive])
+  //   // Empty Active Group When Menu is collapsed and not hovered, to fix issue route change
+  //   if (navCollapsed && !navHover) {
+  //     setGroupActive([])
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [router.asPath])
 
-    // Empty Active Group When Menu is collapsed and not hovered, to fix issue route change
-    if (navCollapsed && !navHover) {
-      setGroupActive([])
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [router.asPath])
+  // useEffect(() => {
+  //   if (navCollapsed && !navHover) {
+  //     setGroupActive([])
+  //   }
 
-  useEffect(() => {
-    if (navCollapsed && !navHover) {
-      setGroupActive([])
-    }
+  //   if ((navCollapsed && navHover) || (groupActive.length === 0 && !navCollapsed)) {
+  //     setGroupActive([...currentActiveGroup])
+  //   }
 
-    if ((navCollapsed && navHover) || (groupActive.length === 0 && !navCollapsed)) {
-      setGroupActive([...currentActiveGroup])
-    }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [navCollapsed, navHover])
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [navCollapsed, navHover])
-
-  useEffect(() => {
-    if (groupActive.length === 0 && !navCollapsed) {
-      setGroupActive([])
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [navHover])
+  // useEffect(() => {
+  //   if (groupActive.length === 0 && !navCollapsed) {
+  //     setGroupActive([])
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [navHover])
 
   const icon = parent && !item.icon ? themeConfig.navSubItemIcon : item.icon
 
   const menuGroupCollapsedStyles = navCollapsed && !navHover ? { opacity: 0 } : { opacity: 1 }
+
+  const childrenItems = useMemo(() => item.children, [item.children])
+
+  const [visibleChild, setVisibleChild] = useState(false)
 
   return (
     <CanViewNavGroup navGroup={item}>
@@ -190,7 +193,7 @@ const VerticalNavGroup = (props: Props) => {
         >
           <ListItemButton
             className={clsx({
-              'Mui-selected': groupActive.includes(item.title) || currentActiveGroup.includes(item.title)
+              'Mui-selected': visibleChild
             })}
             sx={{
               py: 2,
@@ -224,21 +227,22 @@ const VerticalNavGroup = (props: Props) => {
           >
             <ListItemIcon
               sx={{
-                transition: 'margin .25s ease-in-out',
+                // transition: 'margin .25s ease-in-out',
                 ...(parent && navCollapsed && !navHover ? {} : { mr: 2 }),
                 ...(navCollapsed && !navHover ? { mr: 0 } : {}), // this condition should come after (parent && navCollapsed && !navHover) condition for proper styling
-                ...(parent && item.children ? { ml: 1.5, mr: 3.5 } : {})
+                // ...(parent && item.children ? { ml: 1.5 } : {})
+                ...{ ml: 1.5 + level * 1.5 }
               }}
             >
-              <UserIcon icon={icon as string} {...(parent && { fontSize: '0.625rem' })} />
+              <IconifyIcon icon={icon as string} {...{ fontSize: '1.125rem' }} />
             </ListItemIcon>
-            <MenuItemTextWrapper sx={{ ...menuGroupCollapsedStyles, ...(isSubToSub ? { ml: 2 } : {}) }}>
+            <MenuItemTextWrapper sx={{ ...menuGroupCollapsedStyles }}>
               <Typography
                 {...((themeConfig.menuTextTruncate || (!themeConfig.menuTextTruncate && navCollapsed && !navHover)) && {
                   noWrap: true
                 })}
               >
-                <Translations text={item.title} />
+                {`${currentMillisecond()}_${item.title}`}
               </Typography>
               <Box
                 className='menu-item-meta'
@@ -248,7 +252,7 @@ const VerticalNavGroup = (props: Props) => {
                   '& svg': {
                     color: 'text.disabled',
                     transition: 'transform .25s ease-in-out',
-                    ...(groupActive.includes(item.title) && {
+                    ...(visibleChild && {
                       transform: direction === 'ltr' ? 'rotate(90deg)' : 'rotate(-90deg)'
                     })
                   }
@@ -266,14 +270,17 @@ const VerticalNavGroup = (props: Props) => {
                     }}
                   />
                 ) : null}
-                <Icon fontSize='1.125rem' icon={direction === 'ltr' ? 'tabler:chevron-right' : 'tabler:chevron-left'} />
+                <IconifyIcon
+                  fontSize='1.125rem'
+                  icon={direction === 'ltr' ? 'tabler:chevron-right' : 'tabler:chevron-left'}
+                />
               </Box>
             </MenuItemTextWrapper>
           </ListItemButton>
           <Collapse
             component='ul'
             onClick={e => e.stopPropagation()}
-            in={groupActive.includes(item.title)}
+            in={visibleChild}
             sx={{
               pl: 0,
               width: '100%',
@@ -285,8 +292,9 @@ const VerticalNavGroup = (props: Props) => {
               {...props}
               parent={item}
               navVisible={navVisible}
-              verticalNavItems={item.children}
-              isSubToSub={parent && item.children ? item : undefined}
+              verticalNavItems={childrenItems}
+              level={level + 1}
+              isSubToSub={parent && childrenItems ? item : undefined}
             />
           </Collapse>
         </ListItem>
